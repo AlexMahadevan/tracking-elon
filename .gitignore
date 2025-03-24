@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Data files
+*.csv
+*.xlsx
+
+# IDE settings
+.vscode/
+.idea/
+
+*.zip
+*.tsv
+*.csv
+data/unzipped/
+data/*.zip
+data/*.tsv
+data/*.csv
