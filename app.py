@@ -1,28 +1,32 @@
 import streamlit as st
 import pandas as pd
-import os  # <-- Add this line
+import os
 
-#st.write("Current Working Directory:", os.getcwd())
-# st.write("Files in notebooks/weekly_data/:", os.listdir('notebooks/weekly_data/'))
-
-@st.cache_data
+# Load data directly from the saved weekly data file
+@st.cache_data  # Caches data for improved performance
 def load_data():
-    print("Files in 'notebooks/weekly_data/':", os.listdir('notebooks/weekly_data/'))  # Debugging step
-    return pd.read_csv('notebooks/weekly_data/weekly_data_2025-03-09_to_2025-03-15.csv')
+    file_path = 'notebooks/weekly_data/weekly_data_2025-03-09_to_2025-03-15.csv'
+    if not os.path.exists(file_path):
+        file_path = './weekly_data/weekly_data_2025-03-09_to_2025-03-15.csv'
+    return pd.read_csv(file_path)
 
 data = load_data()
 
 # App layout
-st.title("Tracking Elon and Trump on Community Notes")
-st.markdown("Community Notes posts from Donald Trump and Elon Musk rarely go public. Here's a look at data showing this from March 9 - March 15.")
+st.title("Community Notes Analysis")
+st.markdown("Explore insights from our weekly Community Notes data analysis.")
 
-st.subheader("Overall data")
 # Key Metrics
 average_helpfulness_ratio = data['helpfulness_ratio'].mean()
 percent_helpful_notes = (data['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
 
-st.metric("Helpfulness ratio for all helpful notes", round(average_helpfulness_ratio, 2))
-st.metric("Overall percentage of helpful notes", f"{percent_helpful_notes:.2f}%")
+st.metric("Average Helpfulness Ratio", round(average_helpfulness_ratio, 2))
+st.metric("Percentage of Helpful Notes", f"{percent_helpful_notes:.2f}%")
+
+# Prepare data
+data['tweet_url'] = data['tweetId'].apply(lambda tid: f"https://twitter.com/anyuser/status/{tid}" if pd.notnull(tid) else "")
+columns_to_show = ['tweet_url', 'summary', 'total_helpful', 'total_unhelpful', 'helpfulness_ratio',  'noteId']
+existing_columns = [col for col in columns_to_show if col in data.columns]
 
 # Tracked Tweets Analysis
 tracked_tweet_ids = [1899636898533867969]
@@ -31,10 +35,19 @@ tracked_notes = data[data['tweetId'].isin(tracked_tweet_ids)]
 tracked_helpfulness_ratio = tracked_notes['helpfulness_ratio'].mean()
 percent_helpful_tracked_notes = (tracked_notes['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
 
-st.subheader("Trump and Musk data")
-st.metric("Helpfulness ratio for Trump and Musk posts", round(tracked_helpfulness_ratio, 2))
-st.metric("% of Helpful notes on Trump and Musk posts", f"{percent_helpful_tracked_notes:.2f}%")
+st.subheader("Tracked Tweet Analysis")
+st.metric("Helpfulness Ratio for Tracked Tweets", round(tracked_helpfulness_ratio, 2))
+st.metric("% of Helpful Notes on Tracked Tweets", f"{percent_helpful_tracked_notes:.2f}%")
 
-# Data Table Display
-st.subheader("Full Dataset View")
-st.dataframe(data.sample(100), use_container_width=True)
+# Helpful Notes Table
+helpful_notes = data[data['currentStatus'] == 'CURRENTLY_RATED_HELPFUL']
+st.subheader("Helpful Notes")
+st.dataframe(helpful_notes[existing_columns].reset_index(drop=True), use_container_width=True)
+
+# Tracked Tweets Notes Table
+st.subheader("Notes on Tracked Tweets")
+st.dataframe(tracked_notes[existing_columns].reset_index(drop=True), use_container_width=True)
+
+# Full Dataset Table
+st.subheader("All of the Week's Data")
+st.dataframe(data[existing_columns].sample(min(1000, len(data))).reset_index(drop=True), use_container_width=True)
