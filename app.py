@@ -2,6 +2,34 @@ import streamlit as st
 import pandas as pd
 import os
 
+# Inject global font styles to match your website
+st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@400;600&display=swap');
+
+        html, body, [class*="css"] {
+            font-family: 'Source Sans Pro', sans-serif !important;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif !important;
+            color: #000;
+        }
+
+        a {
+            color: #0072ff !important;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #0056b3 !important;
+            text-decoration: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Load data directly from the saved weekly data file
 @st.cache_data  # Caches data for improved performance
 def load_data():
