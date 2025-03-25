@@ -1,5 +1,6 @@
 import pandas as pd
 import glob
+import os
 
 def get_weekly_data():
     ratings_files = glob.glob('notebooks/data/unzipped/ratings-*.tsv')
@@ -40,3 +41,15 @@ def get_weekly_data():
     merged_data = pd.merge(merged_data, note_status, on='noteId', how='inner')
 
     return merged_data
+
+def save_weekly_data():
+    # Create the folder if it doesn't exist
+    weekly_folder = 'notebooks/weekly_data'
+    os.makedirs(weekly_folder, exist_ok=True)
+
+    # Filter data
+    data = get_weekly_data()
+
+    # Save the filtered dataset
+    data.to_csv(f'{weekly_folder}/weekly_data_2025-03-09_to_2025-03-15.csv', index=False)
+    print(f"✅ Weekly data saved to: {weekly_folder}")

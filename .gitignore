@@ -5,6 +5,9 @@ venv/
 __pycache__/
 *.pyc
 
+# But track weekly data
+!notebooks/weekly_data/*.csv
+
 # Data files
 *.csv
 *.xlsx

@@ -1,15 +1,19 @@
 import streamlit as st
-import sys
-sys.path.append('notebooks')
-from main_analysis import get_weekly_data
+import pandas as pd
+import os  # <-- Add this line
 
-# Load data
+st.write("Current Working Directory:", os.getcwd())
+st.write("Files in notebooks/weekly_data/:", os.listdir('notebooks/weekly_data/'))
+
 @st.cache_data
 def load_data():
-    data = get_weekly_data()
-    return data
+    print("Files in 'notebooks/weekly_data/':", os.listdir('notebooks/weekly_data/'))  # Debugging step
+    return pd.read_csv('notebooks/weekly_data/weekly_data_2025-03-09_to_2025-03-15.csv')
 
 data = load_data()
+
+st.write("Data Columns:", data.columns)
+st.write("Sample Data:", data.head())
 
 # App layout
 st.title("Community Notes Analysis")
@@ -35,4 +39,4 @@ st.metric("% of Helpful Notes on Tracked Tweets", f"{percent_helpful_tracked_not
 
 # Data Table Display
 st.subheader("Full Dataset View")
-st.dataframe(data)
+st.dataframe(data.sample(100), use_container_width=True)
