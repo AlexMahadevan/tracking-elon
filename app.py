@@ -12,9 +12,6 @@ def load_data():
 
 data = load_data()
 
-st.write("Data Columns:", data.columns)
-st.write("Sample Data:", data.head())
-
 # App layout
 st.title("Community Notes Analysis")
 st.markdown("Explore insights from our weekly Community Notes data analysis.")
