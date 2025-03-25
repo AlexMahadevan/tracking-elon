@@ -16,7 +16,7 @@ data = load_data()
 st.title("Tracking Elon and Trump on Community Notes")
 st.markdown("Community Notes posts from Donald Trump and Elon Musk rarely go public. Here's a look at data showing this from March 9 - March 15.")
 
-st.subheader("overll data")
+st.subheader("Overall data")
 # Key Metrics
 average_helpfulness_ratio = data['helpfulness_ratio'].mean()
 percent_helpful_notes = (data['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
