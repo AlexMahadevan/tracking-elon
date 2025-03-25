@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import os  # <-- Add this line
 
-st.write("Current Working Directory:", os.getcwd())
-st.write("Files in notebooks/weekly_data/:", os.listdir('notebooks/weekly_data/'))
+#st.write("Current Working Directory:", os.getcwd())
+# st.write("Files in notebooks/weekly_data/:", os.listdir('notebooks/weekly_data/'))
 
 @st.cache_data
 def load_data():
