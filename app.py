@@ -13,15 +13,15 @@ def load_data():
 data = load_data()
 
 # App layout
-st.title("Community Notes Analysis")
-st.markdown("Explore insights from our weekly Community Notes data analysis.")
+st.title("Tracking Elong and Trump — A Community Notes analysis")
+st.markdown("Here are data that show Community Notes posts from Donald Trump and Elon Musk rarely go public. This is from March 9 - March 15.")
 
 # Key Metrics
 average_helpfulness_ratio = data['helpfulness_ratio'].mean()
 percent_helpful_notes = (data['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
 
-st.metric("Average Helpfulness Ratio", round(average_helpfulness_ratio, 2))
-st.metric("Percentage of Helpful Notes", f"{percent_helpful_notes:.2f}%")
+st.metric("Helpfulness ratio for all helpful notes", round(average_helpfulness_ratio, 2))
+st.metric("Overall percentage of helpful notes", f"{percent_helpful_notes:.2f}%")
 
 # Tracked Tweets Analysis
 tracked_tweet_ids = [1899636898533867969]
@@ -31,8 +31,8 @@ tracked_helpfulness_ratio = tracked_notes['helpfulness_ratio'].mean()
 percent_helpful_tracked_notes = (tracked_notes['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
 
 st.subheader("Tracked Tweet Analysis")
-st.metric("Helpfulness Ratio for Tracked Tweets", round(tracked_helpfulness_ratio, 2))
-st.metric("% of Helpful Notes on Tracked Tweets", f"{percent_helpful_tracked_notes:.2f}%")
+st.metric("Helpfulness ratio for Trump and Musk posts", round(tracked_helpfulness_ratio, 2))
+st.metric("% of Helpful notes on Trump and Musk posts", f"{percent_helpful_tracked_notes:.2f}%")
 
 # Data Table Display
 st.subheader("Full Dataset View")
