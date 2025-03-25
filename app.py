@@ -13,9 +13,10 @@ def load_data():
 data = load_data()
 
 # App layout
-st.title("Tracking Elong and Trump — A Community Notes analysis")
-st.markdown("Here are data that show Community Notes posts from Donald Trump and Elon Musk rarely go public. This is from March 9 - March 15.")
+st.title("Tracking Elon and Trump on Community Notes")
+st.markdown("Community Notes posts from Donald Trump and Elon Musk rarely go public. Here's a look at data showing this from March 9 - March 15.")
 
+st.subheader("overll data")
 # Key Metrics
 average_helpfulness_ratio = data['helpfulness_ratio'].mean()
 percent_helpful_notes = (data['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
@@ -30,7 +31,7 @@ tracked_notes = data[data['tweetId'].isin(tracked_tweet_ids)]
 tracked_helpfulness_ratio = tracked_notes['helpfulness_ratio'].mean()
 percent_helpful_tracked_notes = (tracked_notes['currentStatus'] == 'CURRENTLY_RATED_HELPFUL').mean() * 100
 
-st.subheader("Tracked Tweet Analysis")
+st.subheader("Trump and Musk data")
 st.metric("Helpfulness ratio for Trump and Musk posts", round(tracked_helpfulness_ratio, 2))
 st.metric("% of Helpful notes on Trump and Musk posts", f"{percent_helpful_tracked_notes:.2f}%")
 
