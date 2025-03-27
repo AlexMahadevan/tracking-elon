@@ -2,54 +2,64 @@ import pandas as pd
 import glob
 import os
 
-def get_weekly_data():
-    ratings_files = glob.glob('notebooks/data/unzipped/ratings-*.tsv')
-    
-    ratings_chunks = []
-    chunk_size = 200000  # Smaller chunks for efficiency
-    start_date = pd.to_datetime('2025-03-09')
-    end_date = pd.to_datetime('2025-03-16')
+# === Paths ===
+base_dir = os.path.dirname(os.path.dirname(__file__))
+data_path = os.path.join(base_dir, 'data/unzipped')
+weekly_path = os.path.join(base_dir, 'notebooks/weekly_data')
+os.makedirs(weekly_path, exist_ok=True)
 
-    for idx, file in enumerate(ratings_files):
-        print(f"Loading file {idx + 1} of {len(ratings_files)}: {file}")
+# === Load notes and status history ===
+notes = pd.read_csv(os.path.join(data_path, 'notes-00000.tsv'), sep='\t', dtype={'tweetId': str}, low_memory=False)
+note_status = pd.read_csv(os.path.join(data_path, 'noteStatusHistory-00000.tsv'), sep='\t', low_memory=False)
+
+notes['createdAt'] = pd.to_datetime(notes['createdAtMillis'], unit='ms')
+note_status['currentStatusDate'] = pd.to_datetime(note_status['timestampMillisOfCurrentStatus'], unit='ms')
+
+# === Helper function to filter ratings ===
+def load_filtered_ratings(start_date, end_date):
+    ratings_files = glob.glob(os.path.join(data_path, 'ratings-*.tsv'))
+    chunk_size = 500000
+    chunks = []
+    start = pd.to_datetime(start_date)
+    end = pd.to_datetime(end_date)
+
+    for file in ratings_files:
         for chunk in pd.read_csv(file, sep='\t', chunksize=chunk_size):
             chunk['createdAt'] = pd.to_datetime(chunk['createdAtMillis'], unit='ms')
-            filtered_chunk = chunk[(chunk['createdAt'] >= start_date) & (chunk['createdAt'] < end_date)]
-            ratings_chunks.append(filtered_chunk[['noteId', 'helpfulnessLevel']])
+            filtered = chunk[(chunk['createdAt'] >= start) & (chunk['createdAt'] < end)]
+            chunks.append(filtered[['noteId', 'helpfulnessLevel', 'createdAt']])
 
-    if len(ratings_chunks) == 0:
-        print("⚠️ No valid data loaded. Check file paths or content.")
-        return pd.DataFrame()  # Return empty DataFrame to prevent app crash
+    return pd.concat(chunks, ignore_index=True) if chunks else pd.DataFrame()
 
-    all_ratings = pd.concat(ratings_chunks, ignore_index=True)
+# === Define periods ===
+periods = {
+    'recent': ('2025-03-11', '2025-03-25'),
+    'earlier': ('2025-02-03', '2025-02-14')
+}
 
-    # Group by noteId and summarize
-    ratings_summary = all_ratings.groupby('noteId')['helpfulnessLevel'].value_counts().unstack(fill_value=0).reset_index()
-    ratings_summary['total_helpful'] = ratings_summary.get('HELPFUL', 0)
-    ratings_summary['total_unhelpful'] = ratings_summary.get('NOT_HELPFUL', 0)
-    ratings_summary['helpfulness_ratio'] = ratings_summary['total_helpful'] / (
-        ratings_summary['total_helpful'] + ratings_summary['total_unhelpful']
+# === Main processor ===
+def process_period(label, start_date, end_date):
+    print(f"Processing {label} period: {start_date} to {end_date}")
+    ratings = load_filtered_ratings(start_date, end_date)
+    print(f"➡️  Ratings count: {len(ratings)}")
+
+    summary = ratings.groupby('noteId')['helpfulnessLevel'].value_counts().unstack(fill_value=0).reset_index()
+    summary['total_helpful'] = summary.get('HELPFUL', 0)
+    summary['total_unhelpful'] = summary.get('NOT_HELPFUL', 0)
+    summary['helpfulness_ratio'] = summary['total_helpful'] / (
+        summary['total_helpful'] + summary['total_unhelpful']
     )
-    ratings_summary['helpfulness_ratio'] = ratings_summary['helpfulness_ratio'].fillna(0)
+    summary['helpfulness_ratio'] = summary['helpfulness_ratio'].fillna(0)
 
-    # Load notes and status
-    notes = pd.read_csv('notebooks/data/unzipped/notes-00000.tsv', sep='\t', low_memory=False)
-    note_status = pd.read_csv('notebooks/data/unzipped/noteStatusHistory-00000.tsv', sep='\t', low_memory=False)
+    merged = pd.merge(summary, notes, on='noteId', how='left')
+    merged = pd.merge(merged, note_status, on='noteId', how='left')
 
-    # Merge datasets
-    merged_data = pd.merge(ratings_summary, notes, on='noteId', how='inner')
-    merged_data = pd.merge(merged_data, note_status, on='noteId', how='inner')
+    out_path = os.path.join(weekly_path, f"{label}_period_{start_date}_to_{end_date}.csv")
+    merged.to_csv(out_path, index=False)
+    print(f"✅ Saved: {out_path}")
 
-    return merged_data
+    return merged
 
-def save_weekly_data():
-    # Create the folder if it doesn't exist
-    weekly_folder = 'notebooks/weekly_data'
-    os.makedirs(weekly_folder, exist_ok=True)
-
-    # Filter data
-    data = get_weekly_data()
-
-    # Save the filtered dataset
-    data.to_csv(f'{weekly_folder}/weekly_data_2025-03-09_to_2025-03-15.csv', index=False)
-    print(f"✅ Weekly data saved to: {weekly_folder}")
+# === Run for both periods ===
+recent_df = process_period('recent', *periods['recent'])
+earlier_df = process_period('earlier', *periods['earlier'])
