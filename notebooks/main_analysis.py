@@ -2,6 +2,8 @@ import pandas as pd
 import glob
 import os
 
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
+
 # === Paths ===
 base_dir = os.path.dirname(os.path.dirname(__file__))
 data_path = os.path.join(base_dir, 'data/unzipped')

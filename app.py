@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import altair as alt
 
 # === Styling ===
 st.markdown("""
@@ -25,6 +26,8 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 # === Load data ===
 @st.cache_data
@@ -82,10 +85,28 @@ def calc_metrics(df, label):
 st.title("Community Notes Timeframe Comparison")
 st.markdown("We compare the helpfulness of notes and number of proposed notes per tweet across two periods.")
 
+
 # === Table ===
 recent_metrics = calc_metrics(recent_df, "Recent (Mar 11–25)")
 earlier_metrics = calc_metrics(earlier_df, "Earlier (Feb 3–14)")
 comparison_df = pd.concat([earlier_metrics, recent_metrics], ignore_index=True)
+
+# Melt the dataframe for plotting
+melted = comparison_df.melt(id_vars='Period', var_name='Metric', value_name='Value')
+
+# Create bar chart
+chart = alt.Chart(melted).mark_bar().encode(
+    x=alt.X('Period:N', title=None),
+    y=alt.Y('Value:Q'),
+    color='Period:N',
+    column=alt.Column('Metric:N', title='Metric')
+).properties(
+    title='📊 Key Metrics Comparison',
+    width=150,
+    height=300
+)
+
+st.altair_chart(chart, use_container_width=True)
 
 st.subheader("📊 Comparison of Key Metrics")
 st.dataframe(comparison_df.style.set_properties(**{'white-space': 'nowrap'}), use_container_width=True)
