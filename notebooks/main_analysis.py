@@ -35,8 +35,8 @@ def load_filtered_ratings(start_date, end_date):
 
 # === Define periods ===
 periods = {
-    'recent': ('2025-03-11', '2025-03-25'),
-    'earlier': ('2025-02-03', '2025-02-14')
+    'recent': ('2025-03-17', '2025-03-31'),
+    'earlier': ('2025-01-31', '2025-02-14')
 }
 
 # === Main processor ===
