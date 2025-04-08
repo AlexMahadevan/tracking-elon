@@ -17,7 +17,7 @@ def download_file(url, file_path):
     else:
         print(f"❌ Failed to download: {url}")
 
-def download_and_extract(date_str='2025/04/02', ratings_count=16):
+def download_and_extract(date_str='2025/04/08', ratings_count=16):
     os.makedirs(UNZIP_DIR, exist_ok=True)
 
     # Download noteStatusHistory and notes
@@ -41,4 +41,4 @@ def download_and_extract(date_str='2025/04/02', ratings_count=16):
             print(f"✅ Unzipped: {file}")
 
 if __name__ == '__main__':
-    download_and_extract(date_str='2025/04/02')
+    download_and_extract(date_str='2025/04/08')
